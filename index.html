@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWE Electrolyzer — Proses Produksi Hidrogen Hijau</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; overflow:hidden; background:#05080f; }
+body { font-family:'Plus Jakarta Sans', sans-serif; color:#e2eaf5; }
+
+#threeCanvas {
+  position:fixed; inset:0; width:100%; height:100%;
+  display:block; cursor:grab;
+}
+#threeCanvas:active { cursor:grabbing; }
+
+/* ── TOP BAR ── */
+.topbar {
+  position:fixed; top:0; left:0; right:0; z-index:200;
+  background:rgba(5,8,15,0.92); backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(255,255,255,0.07);
+  height:56px; padding:0 24px;
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+}
+.tb-brand { display:flex; align-items:center; gap:10px; }
+.tb-icon {
+  width:34px; height:34px; border-radius:8px;
+  background:linear-gradient(135deg,#1de9b6,#0b8c6a);
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px; flex-shrink:0;
+  box-shadow: 0 4px 14px rgba(29,233,182,0.35);
+}
+.tb-title { font-size:14px; font-weight:800; color:#fff; letter-spacing:-0.3px; }
+.tb-sub { font-size:10px; color:rgba(255,255,255,0.35); display:block; }
+.tb-eq {
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px; color:#1de9b6; letter-spacing:0.5px;
+  background:rgba(29,233,182,0.07);
+  border:1px solid rgba(29,233,182,0.2);
+  padding:4px 14px; border-radius:20px;
+}
+.tb-hint { font-size:11px; color:rgba(255,255,255,0.22); font-family:'JetBrains Mono',monospace; }
+
+/* ── STAGE NAV (top, below topbar) ── */
+.stagenav {
+  position:fixed; top:56px; left:0; right:0; z-index:199;
+  background:rgba(5,8,15,0.88); backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  display:flex; overflow-x:auto; scrollbar-width:none;
+}
+.stagenav::-webkit-scrollbar { display:none; }
+.snbtn {
+  flex:1; min-width:130px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:3px; padding:9px 10px;
+  border:none; border-bottom:2px solid transparent;
+  background:none; cursor:pointer;
+  transition:all 0.18s;
+}
+.snbtn:hover { background:rgba(255,255,255,0.03); }
+.snbtn.on { border-bottom-color:var(--c); }
+.sn-num {
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px; color:rgba(255,255,255,0.25); letter-spacing:2px;
+}
+.sn-name {
+  font-size:11px; font-weight:600; color:rgba(255,255,255,0.4);
+  white-space:nowrap;
+}
+.snbtn.on .sn-name { color:var(--c); }
+
+/* ── INFO CARD (bottom) ── */
+.infocard {
+  position:fixed; bottom:0; left:0; right:0; z-index:200;
+  background:rgba(5,8,15,0.94); backdrop-filter:blur(16px);
+  border-top:1px solid rgba(255,255,255,0.07);
+  display:grid; grid-template-columns:200px 1fr 280px;
+}
+@media(max-width:700px) {
+  .infocard { grid-template-columns:1fr; }
+  .ic-metrics, .ic-stage { display:none; }
+}
+.ic-stage {
+  padding:14px 20px; border-right:1px solid rgba(255,255,255,0.06);
+  display:flex; flex-direction:column; justify-content:center;
+}
+.ic-stage-num { font-family:'JetBrains Mono',monospace; font-size:9px; color:rgba(255,255,255,0.28); letter-spacing:2px; margin-bottom:4px; }
+.ic-stage-title { font-size:16px; font-weight:800; color:#fff; line-height:1.2; }
+.ic-stage-sub { font-size:10px; color:rgba(255,255,255,0.35); margin-top:3px; }
+.ic-body { padding:12px 22px; display:flex; flex-direction:column; justify-content:center; }
+.ic-desc { font-size:12px; line-height:1.75; color:rgba(226,234,245,0.78); }
+.ic-rxn {
+  font-family:'JetBrains Mono',monospace; font-size:11px; color:#1de9b6;
+  background:rgba(29,233,182,0.06); border-left:2px solid rgba(29,233,182,0.3);
+  padding:6px 10px; border-radius:0 4px 4px 0; margin-top:7px;
+  line-height:1.9; display:none;
+}
+.ic-metrics {
+  padding:12px 16px; border-left:1px solid rgba(255,255,255,0.06);
+  display:grid; grid-template-columns:1fr 1fr; gap:7px; align-content:center;
+}
+.ic-m { background:rgba(255,255,255,0.04); border-radius:7px; padding:7px 10px; }
+.ic-m-val { font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; line-height:1; }
+.ic-m-lbl { font-size:9px; color:rgba(255,255,255,0.28); margin-top:3px; text-transform:uppercase; letter-spacing:0.7px; }
+
+/* ── LEGEND ── */
+.legend {
+  position:fixed; left:16px; bottom:155px; z-index:190;
+  background:rgba(5,8,15,0.82); border:1px solid rgba(255,255,255,0.07);
+  border-radius:9px; padding:10px 13px;
+}
+.leg { display:flex; align-items:center; gap:8px; padding:2px 0; font-size:10px; color:rgba(255,255,255,0.48); }
+.leg-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+/* ── TOOLTIP ── */
+.tooltip {
+  position:fixed; z-index:300; pointer-events:none;
+  background:rgba(5,8,15,0.96); border:1px solid rgba(255,255,255,0.1);
+  border-radius:8px; padding:8px 13px; font-size:11px; color:#e2eaf5;
+  line-height:1.6; max-width:220px; opacity:0; transition:opacity 0.15s;
+  backdrop-filter:blur(8px);
+}
+.tooltip.show { opacity:1; }
+
+/* ── STEP LABEL OVERLAY (drawn via canvas) ── */
+.speed-ctrl {
+  position:fixed; right:16px; bottom:155px; z-index:190;
+  background:rgba(5,8,15,0.82); border:1px solid rgba(255,255,255,0.07);
+  border-radius:9px; padding:10px 13px;
+  display:flex; flex-direction:column; gap:6px;
+}
+.sc-label { font-size:9px; color:rgba(255,255,255,0.3); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:2px; }
+.sc-btns { display:flex; gap:6px; }
+.sc-btn {
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+  border-radius:6px; padding:5px 12px;
+  font-size:11px; font-weight:600; color:rgba(255,255,255,0.5);
+  cursor:pointer; transition:all 0.15s; font-family:'Plus Jakarta Sans',sans-serif;
+}
+.sc-btn:hover, .sc-btn.on { background:rgba(29,233,182,0.12); border-color:rgba(29,233,182,0.3); color:#1de9b6; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="tb-brand">
+    <div class="tb-icon">⚗️</div>
+    <div>
+      <div class="tb-title">Produksi Hidrogen Hijau — AWE Electrolyzer</div>
+      <span class="tb-sub">Alkaline Water Electrolyzer · Integrated Geothermal System · IGDOF-GH</span>
+    </div>
+  </div>
+  <div class="tb-eq">2H₂O + listrik → 2H₂ + O₂</div>
+  <div class="tb-hint">Seret · Scroll zoom · Klik objek</div>
+</div>
+
+<!-- STAGE NAV -->
+<div class="stagenav">
+  <button class="snbtn on" style="--c:#3b9aff" data-s="0" onclick="setStage(0)">
+    <span class="sn-num">01</span><span class="sn-name">⚡ Input Listrik</span>
+  </button>
+  <button class="snbtn" style="--c:#4fc3f7" data-s="1" onclick="setStage(1)">
+    <span class="sn-num">02</span><span class="sn-name">💧 Input Air + KOH</span>
+  </button>
+  <button class="snbtn" style="--c:#ef5350" data-s="2" onclick="setStage(2)">
+    <span class="sn-num">03</span><span class="sn-name">⚡ Reaksi Katoda</span>
+  </button>
+  <button class="snbtn" style="--c:#ff9800" data-s="3" onclick="setStage(3)">
+    <span class="sn-num">04</span><span class="sn-name">⚡ Reaksi Anoda</span>
+  </button>
+  <button class="snbtn" style="--c:#ab47bc" data-s="4" onclick="setStage(4)">
+    <span class="sn-num">05</span><span class="sn-name">🔀 Migrasi OH⁻</span>
+  </button>
+  <button class="snbtn" style="--c:#1de9b6" data-s="5" onclick="setStage(5)">
+    <span class="sn-num">06</span><span class="sn-name">🟢 Output H₂</span>
+  </button>
+  <button class="snbtn" style="--c:#ffeb3b" data-s="6" onclick="setStage(6)">
+    <span class="sn-num">07</span><span class="sn-name">🔴 Output O₂</span>
+  </button>
+  <button class="snbtn" style="--c:#69f0ae" data-s="7" onclick="setStage(7)">
+    <span class="sn-num">08</span><span class="sn-name">💚 H₂ Tersimpan</span>
+  </button>
+</div>
+
+<canvas id="threeCanvas"></canvas>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="leg"><div class="leg-dot" style="background:#3b9aff"></div>Listrik (e⁻)</div>
+  <div class="leg"><div class="leg-dot" style="background:#4fc3f7"></div>Molekul H₂O</div>
+  <div class="leg"><div class="leg-dot" style="background:#1de9b6"></div>Gas H₂ (hidrogen)</div>
+  <div class="leg"><div class="leg-dot" style="background:#ffeb3b"></div>Gas O₂ (oksigen)</div>
+  <div class="leg"><div class="leg-dot" style="background:#ab47bc"></div>Ion OH⁻</div>
+  <div class="leg"><div class="leg-dot" style="background:#e53935"></div>Elektroda (Katoda −)</div>
+  <div class="leg"><div class="leg-dot" style="background:#ff8f00"></div>Elektroda (Anoda +)</div>
+</div>
+
+<!-- SPEED CONTROL -->
+<div class="speed-ctrl">
+  <div class="sc-label">Kecepatan</div>
+  <div class="sc-btns">
+    <button class="sc-btn" onclick="setSpeed(0.5)">0.5×</button>
+    <button class="sc-btn on" onclick="setSpeed(1)">1×</button>
+    <button class="sc-btn" onclick="setSpeed(2)">2×</button>
+  </div>
+</div>
+
+<!-- INFO CARD -->
+<div class="infocard">
+  <div class="ic-stage">
+    <div class="ic-stage-num" id="icNum">TAHAP 01 / 08</div>
+    <div class="ic-stage-title" id="icTitle">Input Listrik</div>
+    <div class="ic-stage-sub" id="icSub">Dari Pembangkit Panas Bumi</div>
+  </div>
+  <div class="ic-body">
+    <div class="ic-desc" id="icDesc">Listrik baseload dari pembangkit panas bumi (10 MW) dialirkan ke sistem AWE. Tegangan DC yang dibutuhkan: 1,8–2,4 V per sel. Keunggulan panas bumi: suplai 24/7 tanpa interupsi, optimal untuk operasi elektroliser yang membutuhkan pasokan konstan.</div>
+    <div class="ic-rxn" id="icRxn"></div>
+  </div>
+  <div class="ic-metrics" id="icMetrics">
+    <div class="ic-m"><div class="ic-m-val" style="color:#7dbfff">1,8–2,4 V</div><div class="ic-m-lbl">Tegangan/Sel</div></div>
+    <div class="ic-m"><div class="ic-m-val" style="color:#7dbfff">~54 kWh/kg</div><div class="ic-m-lbl">Konsumsi AWE</div></div>
+    <div class="ic-m"><div class="ic-m-val" style="color:#7dbfff">10 MW</div><div class="ic-m-lbl">Input Daya</div></div>
+    <div class="ic-m"><div class="ic-m-val" style="color:#7dbfff">80.000 jam</div><div class="ic-m-lbl">Umur Stack</div></div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+/* ══════════════════════════════════════════
+   STAGE DATA
+══════════════════════════════════════════ */
+const STAGES = [
+  {
+    num:'01 / 08', title:'Input Listrik', sub:'Dari Pembangkit Panas Bumi',
+    color:'#3b9aff',
+    desc:'Listrik baseload dari pembangkit panas bumi (10 MW) dialirkan ke sistem AWE. Tegangan DC yang dibutuhkan: 1,8–2,4 V per sel. Keunggulan panas bumi: suplai 24/7 tanpa interupsi—optimal untuk elektroliser yang membutuhkan pasokan konstan.',
+    rxn:'', showRxn:false,
+    metrics:[['1,8–2,4 V','Tegangan/Sel','#7dbfff'],['~54 kWh/kg','Konsumsi AWE','#7dbfff'],['10 MW','Input Daya','#7dbfff'],['80.000 jam','Umur Stack','#7dbfff']],
+  },
+  {
+    num:'02 / 08', title:'Input Air + Elektrolit KOH', sub:'Bahan Baku Elektrolisis',
+    color:'#4fc3f7',
+    desc:'Air murni (H₂O) dicampur dengan larutan KOH (Kalium Hidroksida) 20–30% sebagai elektrolit. KOH meningkatkan konduktivitas ionik sehingga reaksi berjalan efisien. Sumber air sebagian dari kondensat uap panas bumi yang sudah terdemineralisasi alami.',
+    rxn:'', showRxn:false,
+    metrics:[['KOH 20–30%','Konsentrasi','#81d4fa'],['9 kg H₂O/kg H₂','Stoikiometri','#81d4fa'],['4 jt L/thn','Kebutuhan Air','#81d4fa'],['Kondensat','Sumber Air','#81d4fa']],
+  },
+  {
+    num:'03 / 08', title:'Reaksi di Katoda (−)', sub:'Reduksi: Produksi H₂',
+    color:'#ef5350',
+    desc:'Pada elektroda negatif (katoda), molekul air menerima elektron dari sumber listrik dan mengalami REDUKSI. Setiap 2 molekul H₂O menerima 4 elektron (e⁻), terpecah menjadi 1 molekul gas hidrogen (H₂) yang naik ke atas, dan 4 ion hidroksida (OH⁻) yang bermigrasi ke anoda.',
+    rxn:'KATODA (−) — Reduksi:\n4H₂O  +  4e⁻  →  2H₂↑  +  4OH⁻',
+    showRxn:true,
+    metrics:[['4e⁻/reaksi','Elektron Terserap','#ef9a9a'],['2H₂ dihasilkan','Output/Siklus','#ef9a9a'],['Reduksi','Jenis Reaksi','#ef9a9a'],['Gas naik','Perilaku H₂','#ef9a9a']],
+  },
+  {
+    num:'04 / 08', title:'Reaksi di Anoda (+)', sub:'Oksidasi: Produksi O₂',
+    color:'#ff9800',
+    desc:'Pada elektroda positif (anoda), ion OH⁻ yang datang dari katoda mengalami OKSIDASI—melepaskan elektron kembali ke sirkuit. Setiap 4 ion OH⁻ menghasilkan 1 molekul O₂ yang naik, 2 molekul H₂O yang kembali ke larutan, dan 4 elektron yang mengalir di sirkuit eksternal.',
+    rxn:'ANODA (+) — Oksidasi:\n4OH⁻  →  O₂↑  +  2H₂O  +  4e⁻',
+    showRxn:true,
+    metrics:[['4OH⁻/reaksi','Ion Masuk','#ffcc80'],['O₂ dilepas','Output/Siklus','#ffcc80'],['Oksidasi','Jenis Reaksi','#ffcc80'],['Gas naik','Perilaku O₂','#ffcc80']],
+  },
+  {
+    num:'05 / 08', title:'Migrasi Ion OH⁻ melalui Diafragma', sub:'Transfer Ionik Selektif',
+    color:'#ab47bc',
+    desc:'Membran diafragma yang terletak di antara katoda dan anoda bersifat permeabel terhadap ion OH⁻ tetapi mencegah gas H₂ dan O₂ bercampur. Ion OH⁻ hasil reaksi katoda bergerak melewati membran menuju anoda untuk melanjutkan siklus reaksi. Pemisahan gas ini krusial untuk keamanan.',
+    rxn:'OH⁻ bermigrasi: Katoda → Diafragma → Anoda\n(Membran mencegah H₂ + O₂ bercampur)',
+    showRxn:true,
+    metrics:[['Permeabel OH⁻','Sifat Diafragma','#ce93d8'],['Memblok H₂/O₂','Fungsi Utama','#ce93d8'],['Ni / Zirconia','Material','#ce93d8'],['Cegah ledakan','Keamanan','#ce93d8']],
+  },
+  {
+    num:'06 / 08', title:'Output H₂ — Gas Hidrogen Murni', sub:'Produk Utama Bernilai Tinggi',
+    color:'#1de9b6',
+    desc:'Gas H₂ murni yang terbentuk di katoda naik dan terkumpul di ruang separator. H₂ kemudian dikeringkan, dimurnikan, dan dikompres. Dari alokasi 30% output listrik panas bumi (24.000 MWh/tahun), sistem AWE menghasilkan sekitar 444 ton H₂/tahun—setara USD 1,8–3,1 juta/tahun.',
+    rxn:'Output H₂:\n24.000 MWh ÷ 54 kWh/kg = 444.444 kg/tahun\n≈ 444 ton H₂/tahun → Kompres → Simpan → Ekspor',
+    showRxn:true,
+    metrics:[['~444 ton/thn','Produksi H₂','#6fffd9'],['USD 4–7/kg','Harga Pasar','#6fffd9'],['>99,9%','Kemurnian','#6fffd9'],['700 bar','Tekanan Simpan','#6fffd9']],
+  },
+  {
+    num:'07 / 08', title:'Output O₂ — Gas Oksigen', sub:'Produk Samping Bernilai',
+    color:'#ffeb3b',
+    desc:'Gas O₂ yang terbentuk di anoda dikumpulkan terpisah. O₂ dapat dijual ke industri medis, metalurgi, atau pengolahan air sebagai aliran pendapatan tambahan. Kemurnian O₂ yang dihasilkan sangat tinggi (>99%), membuatnya bernilai komersial tanpa pemrosesan tambahan yang signifikan.',
+    rxn:'Output O₂:\n2H₂O → 2H₂ + O₂\n(per 444 ton H₂ → ~3.552 ton O₂/tahun)',
+    showRxn:true,
+    metrics:[['~3.552 ton/thn','Produksi O₂','#fff176'],['Medis/Industri','Kegunaan','#fff176'],['>99%','Kemurnian','#fff176'],['Nilai tambah','Status','#fff176']],
+  },
+  {
+    num:'08 / 08', title:'H₂ Hijau Tersimpan & Siap Ekspor', sub:'Output Akhir IGDOF-GH',
+    color:'#69f0ae',
+    desc:'H₂ yang sudah dimurnikan dikompres ke 350–700 bar dan disimpan dalam tangki bertekanan atau dikonversi ke amonia (NH₃) untuk kemudahan transportasi. Dari satu lapangan panas bumi 10 MW, IGDOF-GH menghasilkan ~444 ton H₂/tahun yang siap diekspor ke Jepang, Korea Selatan, dan Uni Eropa.',
+    rxn:'Alur lengkap: Panas Bumi → Listrik → AWE → H₂\n444 ton H₂/thn · USD 6,52/kg LCOH · Target 2030: USD 2–4/kg',
+    showRxn:true,
+    metrics:[['~444 ton/thn','H₂ per 10 MW','#a5d6a7'],['USD 6,52/kg','LCOH Kini','#a5d6a7'],['USD 2–4/kg','Target 2030','#a5d6a7'],['JP · KR · EU','Pasar Ekspor','#a5d6a7']],
+  },
+];
+
+let activeStage = 0;
+let animSpeed = 1.0;
+
+function setStage(n) {
+  activeStage = n;
+  document.querySelectorAll('.snbtn').forEach((b,i) => b.classList.toggle('on', i===n));
+  const S = STAGES[n];
+  document.getElementById('icNum').textContent = S.num;
+  document.getElementById('icTitle').textContent = S.title;
+  document.getElementById('icSub').textContent = S.sub;
+  document.getElementById('icDesc').textContent = S.desc;
+  const rxnEl = document.getElementById('icRxn');
+  rxnEl.textContent = S.rxn;
+  rxnEl.style.display = S.showRxn ? 'block' : 'none';
+  document.getElementById('icMetrics').innerHTML = S.metrics.map(([v,l,c]) =>
+    `<div class="ic-m"><div class="ic-m-val" style="color:${c}">${v}</div><div class="ic-m-lbl">${l}</div></div>`
+  ).join('');
+  updateSceneStage(n);
+}
+
+function setSpeed(s) {
+  animSpeed = s;
+  document.querySelectorAll('.sc-btn').forEach(b => b.classList.remove('on'));
+  event.target.classList.add('on');
+}
+
+/* ══════════════════════════════════════════
+   THREE.JS
+══════════════════════════════════════════ */
+const cv = document.getElementById('threeCanvas');
+const renderer = new THREE.WebGLRenderer({ canvas:cv, antialias:true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+renderer.outputEncoding = THREE.sRGBEncoding;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x05080f);
+scene.fog = new THREE.FogExp2(0x05080f, 0.012);
+
+const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 300);
+camera.position.set(0, 12, 28);
+camera.lookAt(0, 0, 0);
+
+// Lights
+scene.add(new THREE.AmbientLight(0x112233, 1.0));
+const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+sun.position.set(15, 25, 10); sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048);
+sun.shadow.camera.left=-25; sun.shadow.camera.right=25;
+sun.shadow.camera.top=25; sun.shadow.camera.bottom=-25;
+scene.add(sun);
+const fill = new THREE.DirectionalLight(0x2244aa, 0.5);
+fill.position.set(-10, 8, -8); scene.add(fill);
+const hLight = new THREE.PointLight(0x1de9b6, 3, 22);
+hLight.position.set(-5, 5, 0); scene.add(hLight);
+const oLight = new THREE.PointLight(0xffaa00, 2.5, 22);
+oLight.position.set(5, 5, 0); scene.add(oLight);
+
+/* ── HELPERS ── */
+function stdMat(col, rough=0.45, metal=0.3, emissive=0, emInt=0) {
+  return new THREE.MeshStandardMaterial({
+    color:new THREE.Color(col), roughness:rough, metalness:metal,
+    emissive:new THREE.Color(emissive||col), emissiveIntensity:emInt
+  });
+}
+function glassMat(col, opacity=0.22) {
+  return new THREE.MeshPhysicalMaterial({
+    color:new THREE.Color(col), transparent:true, opacity,
+    roughness:0.05, metalness:0, transmission:0.4,
+    side:THREE.DoubleSide
+  });
+}
+function addMesh(geo, mat, x,y,z, rx=0,ry=0,rz=0, shadow=true) {
+  const m = new THREE.Mesh(geo, mat);
+  m.position.set(x,y,z);
+  m.rotation.set(rx,ry,rz);
+  if(shadow) { m.castShadow=true; m.receiveShadow=true; }
+  scene.add(m); return m;
+}
+
+/* ══════════════════════════════════════════
+   BUILD AWE CELL
+   Layout (X axis, left-right):
+   -9  : Listrik input (from geothermal)
+   -5.5: Katoda (electrode -)
+   -1.5: Diafragma (membrane)
+    1.5: Anoda (electrode +)
+    5.5: Listrik output
+    9  : H2 separator/tank (left back)
+   
+   Y axis = height
+   Z axis = depth
+══════════════════════════════════════════ */
+
+/* ── GROUND ── */
+const ground = addMesh(
+  new THREE.PlaneGeometry(60, 40),
+  stdMat(0x090d18, 0.9, 0.1),
+  0,-0.01,0, -Math.PI/2
+);
+scene.add(new THREE.GridHelper(60, 24, 0x0d2040, 0x0a1830));
+
+/* ── MAIN CELL HOUSING (glass outer container) ── */
+// Back wall
+addMesh(new THREE.BoxGeometry(18, 12, 0.25), glassMat(0x113355, 0.18), 0,5.5,-4.5);
+// Front wall
+addMesh(new THREE.BoxGeometry(18, 12, 0.25), glassMat(0x113355, 0.12), 0,5.5,4.5);
+// Left/right walls
+addMesh(new THREE.BoxGeometry(0.25,12,9), glassMat(0x113355,0.15), -9,5.5,0);
+addMesh(new THREE.BoxGeometry(0.25,12,9), glassMat(0x113355,0.15), 9,5.5,0);
+// Bottom base
+addMesh(new THREE.BoxGeometry(18,0.4,9), stdMat(0x1a2a40,0.7,0.4), 0,0,0);
+
+// Cell label plane (metallic nameplate)
+const namePlate = addMesh(new THREE.BoxGeometry(6,0.6,0.2), stdMat(0x1a3a5c,0.5,0.6), 0,12,4.4);
+// Top frame
+for(let x of [-7.5,7.5]) addMesh(new THREE.BoxGeometry(0.3,12,0.3),stdMat(0x334455,0.5,0.7),x,5.5,4.5);
+for(let x of [-7.5,7.5]) addMesh(new THREE.BoxGeometry(0.3,12,0.3),stdMat(0x334455,0.5,0.7),x,5.5,-4.5);
+
+/* ── ELECTROLYTE (KOH solution) — semi-transparent fill ── */
+const electrolyteMat = new THREE.MeshPhysicalMaterial({
+  color:0x1a4a7a, transparent:true, opacity:0.18,
+  roughness:0.05, metalness:0
+});
+const electrolyte = addMesh(new THREE.BoxGeometry(17.2,7,8.6), electrolyteMat, 0,3.2,0, 0,0,0, false);
+
+/* ── CATHODE (−) — left electrode, dark grey/steel ── */
+const cathodeMat = stdMat(0x1a1a2e, 0.4, 0.8, 0xe53935, 0.0);
+const cathode = addMesh(new THREE.BoxGeometry(0.5,9,7.5), cathodeMat, -5.5,4,0);
+// Cathode surface detail (horizontal grooves = active surface)
+for(let y=0.5; y<=8.5; y+=0.7) {
+  addMesh(new THREE.BoxGeometry(0.55,0.12,7.5), stdMat(0x2a2a3e,0.3,0.9), -5.5,y,0);
+}
+// Cathode rod connection
+addMesh(new THREE.CylinderGeometry(0.15,0.15,3,8), stdMat(0x888899,0.4,0.8), -5.5,10,0);
+addMesh(new THREE.SphereGeometry(0.25,8,8), stdMat(0x888899,0.4,0.8), -5.5,11.5,0);
+
+/* ── ANODE (+) — right electrode, bronze/gold ── */
+const anodeMat = stdMat(0x3d2000, 0.4, 0.7, 0xff8f00, 0.0);
+const anode = addMesh(new THREE.BoxGeometry(0.5,9,7.5), anodeMat, 5.5,4,0);
+// Anode surface detail
+for(let y=0.5; y<=8.5; y+=0.7) {
+  addMesh(new THREE.BoxGeometry(0.55,0.12,7.5), stdMat(0x5a3500,0.3,0.8), 5.5,y,0);
+}
+// Anode rod connection
+addMesh(new THREE.CylinderGeometry(0.15,0.15,3,8), stdMat(0xb8860b,0.4,0.8), 5.5,10,0);
+addMesh(new THREE.SphereGeometry(0.25,8,8), stdMat(0xb8860b,0.4,0.8), 5.5,11.5,0);
+
+/* ── DIAPHRAGM MEMBRANE — center ── */
+const diaphMat = new THREE.MeshPhysicalMaterial({
+  color:0x7b68ee, transparent:true, opacity:0.35,
+  roughness:0.1, metalness:0.1, side:THREE.DoubleSide,
+  emissive:0x4444aa, emissiveIntensity:0.2
+});
+const diaphragm = addMesh(new THREE.BoxGeometry(0.12,9,7.5), diaphMat, 0,4,0, 0,0,0, false);
+// Membrane texture - grid lines
+for(let y=0;y<9;y+=0.6){
+  addMesh(new THREE.BoxGeometry(0.14,0.04,7.5),
+    new THREE.MeshBasicMaterial({color:0xaaaaff,transparent:true,opacity:0.4}),
+    0, y+0.2, 0, 0,0,0, false);
+}
+for(let z=-3.6;z<=3.6;z+=0.6){
+  addMesh(new THREE.BoxGeometry(0.14,9,0.04),
+    new THREE.MeshBasicMaterial({color:0xaaaaff,transparent:true,opacity:0.4}),
+    0, 4, z, 0,0,0, false);
+}
+
+/* ── H2 SEPARATOR (left side, connected to cathode) ── */
+const h2SepMat = stdMat(0x0d3d25, 0.4, 0.5, 0x1de9b6, 0.08);
+const h2Sep = addMesh(new THREE.CylinderGeometry(2.2,2.2,7,20), h2SepMat, -13,5.5,0);
+// H2 storage sphere above
+const h2Store = addMesh(
+  new THREE.SphereGeometry(1.8,20,16),
+  stdMat(0x064e3b,0.4,0.5, 0x1de9b6,0.12),
+  -13,12.5,0
+);
+// Connecting pipe from cathode to h2 separator
+addMesh(new THREE.CylinderGeometry(0.22,0.22,7,8),
+  stdMat(0x1a5040,0.5,0.5), -9.3,5.5,0, 0,0,Math.PI/2);
+
+/* ── O2 SEPARATOR (right side, connected to anode) ── */
+const o2SepMat = stdMat(0x3d2800, 0.4, 0.5, 0xff8f00, 0.06);
+const o2Sep = addMesh(new THREE.CylinderGeometry(2.2,2.2,7,20), o2SepMat, 13,5.5,0);
+// O2 outlet sphere
+const o2Out = addMesh(
+  new THREE.SphereGeometry(1.5,20,16),
+  stdMat(0x5a3800,0.4,0.5,0xff8800,0.1),
+  13,12.5,0
+);
+// Connecting pipe from anode to o2 sep
+addMesh(new THREE.CylinderGeometry(0.22,0.22,7,8),
+  stdMat(0x5a4010,0.5,0.5), 9.3,5.5,0, 0,0,Math.PI/2);
+
+/* ── WATER INLET (top center) ── */
+addMesh(new THREE.CylinderGeometry(0.3,0.3,4,8),
+  stdMat(0x2255aa,0.5,0.5), 0,13.5,0);
+const waterTank = addMesh(
+  new THREE.CylinderGeometry(1.5,1.5,4,16),
+  stdMat(0x0a3060,0.4,0.4,0x2266aa,0.05),
+  0,17,0
+);
+// KOH tank (small, next to water)
+const kohTank = addMesh(new THREE.CylinderGeometry(0.8,0.8,3,12),
+  stdMat(0x2a4a10,0.5,0.4,0x44aa22,0.05), 3.5,16.5,0);
+// KOH pipe
+addMesh(new THREE.CylinderGeometry(0.12,0.12,2,8),
+  stdMat(0x334433,0.5,0.4), 2,15.5,0, 0,0,-0.4);
+
+/* ── POWER INPUT CABLES ── */
+// Negative cable (to cathode) — blue
+addMesh(new THREE.CylinderGeometry(0.18,0.18,10,8),
+  stdMat(0x1133aa,0.4,0.7), -5.5,17,0, 0,0,0.3);
+addMesh(new THREE.BoxGeometry(0.5,0.5,0.5), stdMat(0x3355cc,0.3,0.8), -5.5,11.5,0);
+
+// Positive cable (to anode) — red/orange
+addMesh(new THREE.CylinderGeometry(0.18,0.18,10,8),
+  stdMat(0xaa2200,0.4,0.7), 5.5,17,0, 0,0,-0.3);
+addMesh(new THREE.BoxGeometry(0.5,0.5,0.5), stdMat(0xcc4422,0.3,0.8), 5.5,11.5,0);
+
+// Power bus bar (horizontal on top)
+addMesh(new THREE.BoxGeometry(14,0.4,0.4), stdMat(0x334466,0.4,0.8), 0,20,0);
+// Power source box
+addMesh(new THREE.BoxGeometry(3,2.5,2),
+  stdMat(0x1a2a50,0.5,0.4,0x3b9aff,0.15),
+  0,21.5,0);
+
+/* ── PRESSURE GAUGES ── */
+for(let x of [-5.5,5.5]) {
+  addMesh(new THREE.CylinderGeometry(0.3,0.3,0.15,16),
+    stdMat(0x888899,0.3,0.7),
+    x+0.4, 8.5, 4.7, Math.PI/2,0,0);
+}
+
+/* ══════════════════════════════════════════
+   SPRITE LABELS (floating text)
+══════════════════════════════════════════ */
+function makeSprite(text, subtext, bgHex, fgHex, w=220, h=64) {
+  const cv2 = document.createElement('canvas');
+  cv2.width=w; cv2.height=h;
+  const cx=cv2.getContext('2d');
+  // background
+  cx.fillStyle = bgHex+'ee';
+  roundRect2(cx,0,0,w,h,10); cx.fill();
+  cx.strokeStyle=bgHex; cx.lineWidth=2;
+  roundRect2(cx,1,1,w-2,h-2,9); cx.stroke();
+  // text
+  cx.fillStyle=fgHex;
+  cx.font = `bold 20px Plus Jakarta Sans, sans-serif`;
+  cx.textAlign='center'; cx.textBaseline=subtext?'top':'middle';
+  cx.fillText(text, w/2, subtext?10:h/2);
+  if(subtext) {
+    cx.fillStyle=fgHex+'99';
+    cx.font='12px JetBrains Mono, monospace';
+    cx.textBaseline='top';
+    cx.fillText(subtext, w/2, 36);
+  }
+  const tex = new THREE.CanvasTexture(cv2);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true}));
+  sp.scale.set(w/30, h/30, 1);
+  return sp;
+}
+function roundRect2(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);
+}
+
+const spriteLabels = [
+  { text:'KATODA (−)', sub:'Reduksi · H₂ naik', bg:'#1a0505', fg:'#ff8080', pos:[-5.5,10.8,5.5] },
+  { text:'DIAFRAGMA', sub:'Permeabel OH⁻', bg:'#0f0f2a', fg:'#c4b5fd', pos:[0,10.8,5.5] },
+  { text:'ANODA (+)', sub:'Oksidasi · O₂ naik', bg:'#1a1000', fg:'#ffcc66', pos:[5.5,10.8,5.5] },
+  { text:'H₂ SEPARATOR', sub:'~444 ton/tahun', bg:'#001a12', fg:'#4fffce', pos:[-13,10,0] },
+  { text:'O₂ SEPARATOR', sub:'~3.552 ton/tahun', bg:'#1a0a00', fg:'#ffd080', pos:[13,10,0] },
+  { text:'H₂O + KOH', sub:'Elektrolit 20–30%', bg:'#001020', fg:'#88ccff', pos:[0,21,0] },
+  { text:'LISTRIK PANAS BUMI', sub:'~54 kWh/kg H₂', bg:'#000a20', fg:'#7ab4ff', pos:[0,23.5,0] },
+];
+spriteLabels.forEach(l => {
+  const sp = makeSprite(l.text, l.sub, l.bg, l.fg);
+  sp.position.set(...l.pos);
+  scene.add(sp);
+});
+
+/* ══════════════════════════════════════════
+   PARTICLE SYSTEMS
+══════════════════════════════════════════ */
+class ParticleFlow {
+  constructor(count, pathPts, color, size) {
+    this.curve = new THREE.CatmullRomCurve3(pathPts.map(p=>new THREE.Vector3(...p)));
+    this.count = count;
+    this.color = new THREE.Color(color);
+    this.size = size;
+    this.offsets = Array.from({length:count}, ()=>Math.random());
+    const pos = new Float32Array(count*3);
+    this.geo = new THREE.BufferGeometry();
+    this.geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+    this.mat = new THREE.PointsMaterial({
+      color:this.color, size, transparent:true, opacity:0.9, sizeAttenuation:true
+    });
+    this.pts = new THREE.Points(this.geo, this.mat);
+    scene.add(this.pts);
+    this.active = true;
+  }
+  update(t) {
+    if(!this.active) return;
+    const pos = this.pts.geometry.attributes.position;
+    for(let i=0;i<this.count;i++){
+      const f = (this.offsets[i] + t) % 1;
+      const p = this.curve.getPoint(f);
+      pos.setXYZ(i, p.x, p.y, p.z);
+    }
+    pos.needsUpdate=true;
+  }
+  show(v) { this.pts.visible=v; }
+}
+
+/* ── Particle paths ── */
+// Water falling into cell
+const PF_WATER = new ParticleFlow(18,
+  [[0,17.5,0],[0,14,0],[0,11,0],[0,7.5,0],[-2,5,0],[2,5,0]],
+  '#4fc3f7', 0.16);
+// KOH mixing
+const PF_KOH = new ParticleFlow(10,
+  [[3.5,16.2,0],[2,15,0],[0.5,13,0],[0,11,0]],
+  '#88dd44', 0.14);
+// Electricity to cathode (electrons flowing down)
+const PF_ELEC_CAT = new ParticleFlow(20,
+  [[-5.5,20.5,0],[-5.5,12,0],[-5.5,9,0],[-5.5,5,0]],
+  '#3b9aff', 0.17);
+// Electricity to anode  
+const PF_ELEC_AN = new ParticleFlow(20,
+  [[5.5,20.5,0],[5.5,12,0],[5.5,9,0],[5.5,5,0]],
+  '#ff4422', 0.17);
+// H2 bubbles rising at cathode
+const PF_H2_RISE = new ParticleFlow(22,
+  [[-5.5,0.5,-2],[-5.5,3,-2],[-5.5,5.5,-2],[-5.5,8,-1],[-5.5,10,0],[-7,10.5,0],[-9.3,9.5,0],[-13,9.5,0]],
+  '#1de9b6', 0.18);
+// O2 bubbles rising at anode
+const PF_O2_RISE = new ParticleFlow(18,
+  [[5.5,0.5,2],[5.5,3,2],[5.5,5.5,2],[5.5,8,1],[5.5,10,0],[7,10.5,0],[9.3,9.5,0],[13,9.5,0]],
+  '#ffdd33', 0.17);
+// OH- ions migrating through membrane (right to left)
+const PF_OH = new ParticleFlow(16,
+  [[-5,3,0],[-2.5,3,0],[0,3.5,0],[2.5,3,0],[5,2.5,0]],
+  '#ab47bc', 0.15);
+// H2 to storage
+const PF_H2_STORE = new ParticleFlow(14,
+  [[-13,9,0],[-13,11,0],[-13,13.5,0]],
+  '#1de9b6', 0.16);
+// O2 to outlet
+const PF_O2_OUT = new ParticleFlow(12,
+  [[13,9,0],[13,11,0],[13,13.5,0]],
+  '#ffcc00', 0.15);
+
+const allFlows = [PF_WATER, PF_KOH, PF_ELEC_CAT, PF_ELEC_AN, PF_H2_RISE, PF_O2_RISE, PF_OH, PF_H2_STORE, PF_O2_OUT];
+
+/* ── Stage → visible flows ── */
+const stageFlows = {
+  0: [PF_ELEC_CAT, PF_ELEC_AN],                                      // electric input
+  1: [PF_WATER, PF_KOH, PF_ELEC_CAT, PF_ELEC_AN],                   // water+KOH
+  2: [PF_ELEC_CAT, PF_H2_RISE],                                      // cathode rxn
+  3: [PF_ELEC_AN, PF_O2_RISE],                                       // anode rxn
+  4: [PF_OH, PF_H2_RISE, PF_O2_RISE],                               // OH- migration
+  5: [PF_H2_RISE, PF_H2_STORE, PF_OH, PF_ELEC_CAT, PF_ELEC_AN],   // H2 output
+  6: [PF_O2_RISE, PF_O2_OUT, PF_OH, PF_ELEC_CAT, PF_ELEC_AN],     // O2 output
+  7: [PF_WATER, PF_KOH, PF_ELEC_CAT, PF_ELEC_AN,                   // full cycle
+      PF_H2_RISE, PF_O2_RISE, PF_OH, PF_H2_STORE, PF_O2_OUT],
+};
+
+/* ── Stage → component highlights ── */
+const objs = { cathode, diaphragm, anode, h2Sep, o2Sep, h2Store, o2Out, waterTank, kohTank };
+const origMats = new Map();
+Object.entries(objs).forEach(([k,o]) => { origMats.set(o, o.material.clone()); });
+
+const stageHighlights = {
+  0: { objs:[], lightTarget:[hLight,oLight], colors:['#3b9aff','#ff4400'] },
+  1: { objs:['waterTank','kohTank'], lightTarget:[], colors:[] },
+  2: { objs:['cathode'], lightTarget:[hLight], colors:['#ef5350'] },
+  3: { objs:['anode'], lightTarget:[oLight], colors:['#ff9800'] },
+  4: { objs:['diaphragm','cathode','anode'], lightTarget:[], colors:[] },
+  5: { objs:['cathode','h2Sep','h2Store'], lightTarget:[hLight], colors:['#1de9b6'] },
+  6: { objs:['anode','o2Sep','o2Out'], lightTarget:[oLight], colors:['#ffeb3b'] },
+  7: { objs:['cathode','anode','diaphragm','h2Sep','o2Sep','h2Store','o2Out'], lightTarget:[], colors:[] },
+};
+
+function updateSceneStage(n) {
+  // Reset all emissive
+  Object.values(objs).forEach(o => {
+    o.material.emissiveIntensity = 0;
+  });
+  // Reset lights
+  hLight.intensity = 1.5; oLight.intensity = 1.5;
+  hLight.color.set(0x1de9b6); oLight.color.set(0xff9900);
+
+  // Show/hide flows
+  allFlows.forEach(f => f.show(false));
+  const sf = stageFlows[n] || [];
+  sf.forEach(f => f.show(true));
+
+  // Highlight objects
+  const sh = stageHighlights[n];
+  if(sh) {
+    sh.objs.forEach((name,i) => {
+      const obj = objs[name];
+      if(!obj) return;
+      const col = sh.colors[i] || STAGES[n].color;
+      obj.material.emissive = new THREE.Color(col);
+      obj.material.emissiveIntensity = 0.55;
+    });
+    sh.lightTarget.forEach((lt,i) => {
+      lt.intensity = 5;
+      if(sh.colors[i]) lt.color.set(sh.colors[i]);
+    });
+  }
+}
+
+/* ══════════════════════════════════════════
+   ORBIT CAMERA
+══════════════════════════════════════════ */
+let sph = { th:0.08, ph:1.05, r:32 };
+let isDrag=false, prevM={x:0,y:0};
+const lookAt = new THREE.Vector3(0,5,0);
+const camPos = new THREE.Vector3();
+camPos.copy(camera.position);
+
+cv.addEventListener('mousedown',e=>{isDrag=true;prevM={x:e.clientX,y:e.clientY};});
+window.addEventListener('mouseup',()=>isDrag=false);
+window.addEventListener('mousemove',e=>{
+  if(!isDrag)return;
+  sph.th -= (e.clientX-prevM.x)*0.01;
+  sph.ph = Math.max(0.2,Math.min(1.55,sph.ph+(e.clientY-prevM.y)*0.007));
+  prevM={x:e.clientX,y:e.clientY};
+});
+cv.addEventListener('wheel',e=>{sph.r=Math.max(12,Math.min(65,sph.r+e.deltaY*0.04));},{passive:true});
+cv.addEventListener('touchstart',e=>{isDrag=true;prevM={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
+window.addEventListener('touchend',()=>isDrag=false);
+window.addEventListener('touchmove',e=>{
+  if(!isDrag)return;
+  sph.th-=(e.touches[0].clientX-prevM.x)*0.01;
+  sph.ph=Math.max(0.2,Math.min(1.55,sph.ph+(e.touches[0].clientY-prevM.y)*0.007));
+  prevM={x:e.touches[0].clientX,y:e.touches[0].clientY};
+},{passive:true});
+
+/* ══════════════════════════════════════════
+   RAYCASTER / TOOLTIP / CLICK
+══════════════════════════════════════════ */
+const raycaster2 = new THREE.Raycaster();
+const mouse2 = new THREE.Vector2();
+const tooltipEl = document.getElementById('tooltip');
+const clickMap = new Map([
+  [cathode, {tip:'Katoda (−) — Elektroda Negatif\nReduksi: 4H₂O + 4e⁻ → 2H₂↑ + 4OH⁻', step:2}],
+  [anode,   {tip:'Anoda (+) — Elektroda Positif\nOksidasi: 4OH⁻ → O₂↑ + 2H₂O + 4e⁻', step:3}],
+  [diaphragm,{tip:'Diafragma Membran\nPermeabel OH⁻ · Memblok H₂ & O₂\nMaterial: Ni / Zirconia', step:4}],
+  [h2Sep,   {tip:'H₂ Separator\n~444 ton H₂/tahun per 10 MW', step:5}],
+  [o2Sep,   {tip:'O₂ Separator\n~3.552 ton O₂/tahun · Bernilai komersial', step:6}],
+  [h2Store, {tip:'Tangki Penyimpanan H₂\nKompres 350–700 bar → Ekspor JP/KR/EU', step:7}],
+  [o2Out,   {tip:'Tangki O₂\nKemurnian >99% → Industri medis', step:6}],
+  [waterTank,{tip:'Tangki Air + KOH\nH₂O + KOH 20–30% = Elektrolit alkalin', step:1}],
+  [kohTank, {tip:'Tangki KOH\nKalium Hidroksida — meningkatkan konduktivitas ionik', step:1}],
+]);
+
+window.addEventListener('mousemove', e => {
+  mouse2.x=(e.clientX/window.innerWidth)*2-1;
+  mouse2.y=-((e.clientY/window.innerHeight)*2-1);
+  raycaster2.setFromCamera(mouse2,camera);
+  const hits=raycaster2.intersectObjects([...clickMap.keys()]);
+  if(hits.length>0){
+    const d=clickMap.get(hits[0].object);
+    if(d){
+      tooltipEl.innerHTML=d.tip.replace(/\n/g,'<br>');
+      tooltipEl.style.left=(e.clientX+14)+'px';
+      tooltipEl.style.top=(e.clientY-10)+'px';
+      tooltipEl.classList.add('show');
+      cv.style.cursor='pointer';
+      return;
+    }
+  }
+  tooltipEl.classList.remove('show');
+  cv.style.cursor=isDrag?'grabbing':'grab';
+});
+
+window.addEventListener('click', e => {
+  raycaster2.setFromCamera(mouse2,camera);
+  const hits=raycaster2.intersectObjects([...clickMap.keys()]);
+  if(hits.length>0){
+    const d=clickMap.get(hits[0].object);
+    if(d) setStage(d.step);
+  }
+});
+
+/* ══════════════════════════════════════════
+   RESIZE
+══════════════════════════════════════════ */
+function onResize(){
+  const w=window.innerWidth,h=window.innerHeight;
+  camera.aspect=w/h; camera.updateProjectionMatrix();
+  renderer.setSize(w,h);
+}
+window.addEventListener('resize',onResize);
+onResize();
+
+/* ══════════════════════════════════════════
+   ANIMATE
+══════════════════════════════════════════ */
+let tick=0;
+function animate(){
+  requestAnimationFrame(animate);
+  const t = tick * 0.0018 * animSpeed;
+
+  // Camera orbit
+  const tx=sph.r*Math.sin(sph.ph)*Math.sin(sph.th);
+  const ty=sph.r*Math.cos(sph.ph);
+  const tz=sph.r*Math.sin(sph.ph)*Math.cos(sph.th);
+  camPos.lerp(new THREE.Vector3(lookAt.x+tx, lookAt.y+ty, lookAt.z+tz), 0.06);
+  camera.position.copy(camPos);
+  camera.lookAt(lookAt);
+
+  // Particle flows
+  allFlows.forEach(f => f.update(t));
+
+  // Pulsing glow on H2 sphere
+  h2Store.material.emissiveIntensity = h2Store.material.emissiveIntensity > 0
+    ? 0.12 + Math.sin(tick*0.04)*0.08 : 0;
+  h2Sep.material.emissiveIntensity = h2Sep.material.emissiveIntensity > 0
+    ? 0.08 + Math.sin(tick*0.05)*0.06 : 0;
+  o2Sep.material.emissiveIntensity = o2Sep.material.emissiveIntensity > 0
+    ? 0.06 + Math.sin(tick*0.05)*0.05 : 0;
+
+  // Cathode/Anode pulse
+  if(cathode.material.emissiveIntensity > 0)
+    cathode.material.emissiveIntensity = 0.45 + Math.sin(tick*0.06)*0.15;
+  if(anode.material.emissiveIntensity > 0)
+    anode.material.emissiveIntensity = 0.45 + Math.sin(tick*0.06)*0.15;
+  if(diaphragm.material.emissiveIntensity > 0)
+    diaphragm.material.emissiveIntensity = 0.2 + Math.sin(tick*0.05)*0.12;
+
+  // Lights pulse
+  hLight.intensity = (activeStage===2||activeStage===5||activeStage===7)
+    ? 4 + Math.sin(tick*0.07)*1.5 : 2 + Math.sin(tick*0.04)*0.5;
+  oLight.intensity = (activeStage===3||activeStage===6||activeStage===7)
+    ? 3.5 + Math.sin(tick*0.07)*1.2 : 1.5 + Math.sin(tick*0.04)*0.4;
+
+  // Membrane shimmer
+  diaphMat.emissiveIntensity = 0.15 + Math.sin(tick*0.08)*0.08;
+  // Electrolyte shimmer
+  electrolyteMat.opacity = 0.14 + Math.sin(tick*0.03)*0.04;
+
+  tick++;
+  renderer.render(scene,camera);
+}
+
+animate();
+setStage(0);
+
+document.addEventListener('keydown', e => {
+  if(e.key==='ArrowRight') setStage(Math.min(7,activeStage+1));
+  if(e.key==='ArrowLeft')  setStage(Math.max(0,activeStage-1));
+});
+</script>
+</body>
+</html>

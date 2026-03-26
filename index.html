@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AWE Electrolyzer — Proses Produksi Hidrogen Hijau</title>
+<title>AWE Electrolyzer — Green Hydrogen Production Process</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
@@ -150,39 +150,39 @@ body { font-family:'Plus Jakarta Sans', sans-serif; color:#e2eaf5; }
   <div class="tb-brand">
     <div class="tb-icon">⚗️</div>
     <div>
-      <div class="tb-title">Produksi Hidrogen Hijau — AWE Electrolyzer</div>
+      <div class="tb-title">Green Hydrogen Production — AWE Electrolyzer</div>
       <span class="tb-sub">Alkaline Water Electrolyzer · Integrated Geothermal System · IGDOF-GH</span>
     </div>
   </div>
-  <div class="tb-eq">2H₂O + listrik → 2H₂ + O₂</div>
-  <div class="tb-hint">Seret · Scroll zoom · Klik objek</div>
+  <div class="tb-eq">2H₂O + electricity → 2H₂ + O₂</div>
+  <div class="tb-hint">Drag · Scroll to zoom · Click objects</div>
 </div>
 
 <!-- STAGE NAV -->
 <div class="stagenav">
   <button class="snbtn on" style="--c:#3b9aff" data-s="0" onclick="setStage(0)">
-    <span class="sn-num">01</span><span class="sn-name">⚡ Input Listrik</span>
+    <span class="sn-num">01</span><span class="sn-name">⚡ Electrical Input</span>
   </button>
   <button class="snbtn" style="--c:#4fc3f7" data-s="1" onclick="setStage(1)">
-    <span class="sn-num">02</span><span class="sn-name">💧 Input Air + KOH</span>
+    <span class="sn-num">02</span><span class="sn-name">💧 Electrolyte Input (Water + KOH)</span>
   </button>
   <button class="snbtn" style="--c:#ef5350" data-s="2" onclick="setStage(2)">
-    <span class="sn-num">03</span><span class="sn-name">⚡ Reaksi Katoda</span>
+    <span class="sn-num">03</span><span class="sn-name">⚡ Cathode Reaction</span>
   </button>
   <button class="snbtn" style="--c:#ff9800" data-s="3" onclick="setStage(3)">
-    <span class="sn-num">04</span><span class="sn-name">⚡ Reaksi Anoda</span>
+    <span class="sn-num">04</span><span class="sn-name">⚡Anode Reaction</span>
   </button>
   <button class="snbtn" style="--c:#ab47bc" data-s="4" onclick="setStage(4)">
-    <span class="sn-num">05</span><span class="sn-name">🔀 Migrasi OH⁻</span>
+    <span class="sn-num">05</span><span class="sn-name">🔀 OH⁻ Migration</span>
   </button>
   <button class="snbtn" style="--c:#1de9b6" data-s="5" onclick="setStage(5)">
-    <span class="sn-num">06</span><span class="sn-name">🟢 Output H₂</span>
+    <span class="sn-num">06</span><span class="sn-name">🟢 Hydrogen Output (H₂)</span>
   </button>
   <button class="snbtn" style="--c:#ffeb3b" data-s="6" onclick="setStage(6)">
-    <span class="sn-num">07</span><span class="sn-name">🔴 Output O₂</span>
+    <span class="sn-num">07</span><span class="sn-name">🔴Oxygen Output (O₂)</span>
   </button>
   <button class="snbtn" style="--c:#69f0ae" data-s="7" onclick="setStage(7)">
-    <span class="sn-num">08</span><span class="sn-name">💚 H₂ Tersimpan</span>
+    <span class="sn-num">08</span><span class="sn-name">💚 Stored Hydrogen (H₂)</span>
   </button>
 </div>
 
@@ -190,18 +190,18 @@ body { font-family:'Plus Jakarta Sans', sans-serif; color:#e2eaf5; }
 
 <!-- LEGEND -->
 <div class="legend">
-  <div class="leg"><div class="leg-dot" style="background:#3b9aff"></div>Listrik (e⁻)</div>
-  <div class="leg"><div class="leg-dot" style="background:#4fc3f7"></div>Molekul H₂O</div>
-  <div class="leg"><div class="leg-dot" style="background:#1de9b6"></div>Gas H₂ (hidrogen)</div>
-  <div class="leg"><div class="leg-dot" style="background:#ffeb3b"></div>Gas O₂ (oksigen)</div>
-  <div class="leg"><div class="leg-dot" style="background:#ab47bc"></div>Ion OH⁻</div>
-  <div class="leg"><div class="leg-dot" style="background:#e53935"></div>Elektroda (Katoda −)</div>
-  <div class="leg"><div class="leg-dot" style="background:#ff8f00"></div>Elektroda (Anoda +)</div>
+  <div class="leg"><div class="leg-dot" style="background:#3b9aff"></div>Electricity (e⁻)</div>
+  <div class="leg"><div class="leg-dot" style="background:#4fc3f7"></div>H₂O Molecules</div>
+  <div class="leg"><div class="leg-dot" style="background:#1de9b6"></div>H₂ Gas (Hydrogen)</div>
+  <div class="leg"><div class="leg-dot" style="background:#ffeb3b"></div>O₂ Gas (Oxygen)</div>
+  <div class="leg"><div class="leg-dot" style="background:#ab47bc"></div>OH⁻ Ions</div>
+  <div class="leg"><div class="leg-dot" style="background:#e53935"></div>Electrode (Cathode −)</div>
+  <div class="leg"><div class="leg-dot" style="background:#ff8f00"></div>Electrode (Anode +)</div>
 </div>
 
 <!-- SPEED CONTROL -->
 <div class="speed-ctrl">
-  <div class="sc-label">Kecepatan</div>
+  <div class="sc-label">Speed</div>
   <div class="sc-btns">
     <button class="sc-btn" onclick="setSpeed(0.5)">0.5×</button>
     <button class="sc-btn on" onclick="setSpeed(1)">1×</button>
@@ -212,19 +212,24 @@ body { font-family:'Plus Jakarta Sans', sans-serif; color:#e2eaf5; }
 <!-- INFO CARD -->
 <div class="infocard">
   <div class="ic-stage">
-    <div class="ic-stage-num" id="icNum">TAHAP 01 / 08</div>
-    <div class="ic-stage-title" id="icTitle">Input Listrik</div>
-    <div class="ic-stage-sub" id="icSub">Dari Pembangkit Panas Bumi</div>
+    <div class="ic-stage-num" id="icNum">STAGE 01 / 08</div>
+    <div class="ic-stage-title" id="icTitle">Electrical Input</div>
+    <div class="ic-stage-sub" id="icSub">From Geothermal Power Plant</div>
   </div>
   <div class="ic-body">
-    <div class="ic-desc" id="icDesc">Listrik baseload dari pembangkit panas bumi (10 MW) dialirkan ke sistem AWE. Tegangan DC yang dibutuhkan: 1,8–2,4 V per sel. Keunggulan panas bumi: suplai 24/7 tanpa interupsi, optimal untuk operasi elektroliser yang membutuhkan pasokan konstan.</div>
+    <div class="ic-desc" id="icDesc">
+      Baseload electricity from a geothermal power plant (10 MW) is supplied to the AWE system. 
+      The required DC voltage is 1.8–2.4 V per cell. The advantage of geothermal energy is its 
+      24/7 supply without interruption, making it optimal for electrolyzer operation that requires 
+      a constant power supply.
+    </div>
     <div class="ic-rxn" id="icRxn"></div>
   </div>
   <div class="ic-metrics" id="icMetrics">
-    <div class="ic-m"><div class="ic-m-val" style="color:#7dbfff">1,8–2,4 V</div><div class="ic-m-lbl">Tegangan/Sel</div></div>
-    <div class="ic-m"><div class="ic-m-val" style="color:#7dbfff">~54 kWh/kg</div><div class="ic-m-lbl">Konsumsi AWE</div></div>
-    <div class="ic-m"><div class="ic-m-val" style="color:#7dbfff">10 MW</div><div class="ic-m-lbl">Input Daya</div></div>
-    <div class="ic-m"><div class="ic-m-val" style="color:#7dbfff">80.000 jam</div><div class="ic-m-lbl">Umur Stack</div></div>
+    <div class="ic-m"><div class="ic-m-val" style="color:#7dbfff">1.8–2.4 V</div><div class="ic-m-lbl">Voltage/Cell</div></div>
+    <div class="ic-m"><div class="ic-m-val" style="color:#7dbfff">~54 kWh/kg</div><div class="ic-m-lbl">AWE Consumption</div></div>
+    <div class="ic-m"><div class="ic-m-val" style="color:#7dbfff">10 MW</div><div class="ic-m-lbl">Power Input</div></div>
+    <div class="ic-m"><div class="ic-m-val" style="color:#7dbfff">80,000 hours</div><div class="ic-m-lbl">Stack Lifetime</div></div>
   </div>
 </div>
 
@@ -236,66 +241,66 @@ body { font-family:'Plus Jakarta Sans', sans-serif; color:#e2eaf5; }
 ══════════════════════════════════════════ */
 const STAGES = [
   {
-    num:'01 / 08', title:'Input Listrik', sub:'Dari Pembangkit Panas Bumi',
+    num:'01 / 08', title:'Electrical Input', sub:'From Geothermal Power Plant',
     color:'#3b9aff',
-    desc:'Listrik baseload dari pembangkit panas bumi (10 MW) dialirkan ke sistem AWE. Tegangan DC yang dibutuhkan: 1,8–2,4 V per sel. Keunggulan panas bumi: suplai 24/7 tanpa interupsi—optimal untuk elektroliser yang membutuhkan pasokan konstan.',
+    desc:'Baseload electricity from a geothermal power plant (10 MW) is supplied to the AWE system. The required DC voltage is 1.8–2.4 V per cell. The advantage of geothermal energy is its 24/7 supply without interruption—optimal for electrolyzer operation that requires a constant power supply.',
     rxn:'', showRxn:false,
-    metrics:[['1,8–2,4 V','Tegangan/Sel','#7dbfff'],['~54 kWh/kg','Konsumsi AWE','#7dbfff'],['10 MW','Input Daya','#7dbfff'],['80.000 jam','Umur Stack','#7dbfff']],
+    metrics:[['1.8–2.4 V','Voltage/Cell','#7dbfff'],['~54 kWh/kg','AWE Consumption','#7dbfff'],['10 MW','Power Input','#7dbfff'],['80,000 hours','Stack Lifetime','#7dbfff']],
   },
   {
-    num:'02 / 08', title:'Input Air + Elektrolit KOH', sub:'Bahan Baku Elektrolisis',
+    num:'02 / 08', title:'Water + KOH Electrolyte Input', sub:'Electrolysis Feedstock',
     color:'#4fc3f7',
-    desc:'Air murni (H₂O) dicampur dengan larutan KOH (Kalium Hidroksida) 20–30% sebagai elektrolit. KOH meningkatkan konduktivitas ionik sehingga reaksi berjalan efisien. Sumber air sebagian dari kondensat uap panas bumi yang sudah terdemineralisasi alami.',
+    desc:'Pure water (H₂O) is mixed with a 20–30% potassium hydroxide (KOH) solution as the electrolyte. KOH increases ionic conductivity so that the reaction proceeds efficiently. Part of the water source comes from geothermal steam condensate that has been naturally demineralized.',
     rxn:'', showRxn:false,
-    metrics:[['KOH 20–30%','Konsentrasi','#81d4fa'],['9 kg H₂O/kg H₂','Stoikiometri','#81d4fa'],['4 jt L/thn','Kebutuhan Air','#81d4fa'],['Kondensat','Sumber Air','#81d4fa']],
+    metrics:[['KOH 20–30%','Concentration','#81d4fa'],['9 kg H₂O/kg H₂','Stoichiometry','#81d4fa'],['4 million L/year','Water Demand','#81d4fa'],['Condensate','Water Source','#81d4fa']],
   },
   {
-    num:'03 / 08', title:'Reaksi di Katoda (−)', sub:'Reduksi: Produksi H₂',
+    num:'03 / 08', title:'Reaction at the Cathode (−)', sub:'Reduction: H₂ Production',
     color:'#ef5350',
-    desc:'Pada elektroda negatif (katoda), molekul air menerima elektron dari sumber listrik dan mengalami REDUKSI. Setiap 2 molekul H₂O menerima 4 elektron (e⁻), terpecah menjadi 1 molekul gas hidrogen (H₂) yang naik ke atas, dan 4 ion hidroksida (OH⁻) yang bermigrasi ke anoda.',
-    rxn:'KATODA (−) — Reduksi:\n4H₂O  +  4e⁻  →  2H₂↑  +  4OH⁻',
+    desc:'At the negative electrode (cathode), water molecules receive electrons from the power source and undergo REDUCTION. Every 2 molecules of H₂O receive 4 electrons (e⁻), splitting into 1 molecule of hydrogen gas (H₂) that rises upward, and 4 hydroxide ions (OH⁻) that migrate to the anode.',
+    rxn:'CATHODE (−) — Reduction:\n4H₂O  +  4e⁻  →  2H₂↑  +  4OH⁻',
     showRxn:true,
-    metrics:[['4e⁻/reaksi','Elektron Terserap','#ef9a9a'],['2H₂ dihasilkan','Output/Siklus','#ef9a9a'],['Reduksi','Jenis Reaksi','#ef9a9a'],['Gas naik','Perilaku H₂','#ef9a9a']],
+    metrics:[['4e⁻/reaction','Electrons Consumed','#ef9a9a'],['2H₂ produced','Output/Cycle','#ef9a9a'],['Reduction','Reaction Type','#ef9a9a'],['Gas rises','H₂ Behavior','#ef9a9a']],
   },
   {
-    num:'04 / 08', title:'Reaksi di Anoda (+)', sub:'Oksidasi: Produksi O₂',
+    num:'04 / 08', title:'Reaction at the Anode (+)', sub:'Oxidation: O₂ Production',
     color:'#ff9800',
-    desc:'Pada elektroda positif (anoda), ion OH⁻ yang datang dari katoda mengalami OKSIDASI—melepaskan elektron kembali ke sirkuit. Setiap 4 ion OH⁻ menghasilkan 1 molekul O₂ yang naik, 2 molekul H₂O yang kembali ke larutan, dan 4 elektron yang mengalir di sirkuit eksternal.',
-    rxn:'ANODA (+) — Oksidasi:\n4OH⁻  →  O₂↑  +  2H₂O  +  4e⁻',
+    desc:'At the positive electrode (anode), OH⁻ ions arriving from the cathode undergo OXIDATION—releasing electrons back into the circuit. Every 4 OH⁻ ions produce 1 molecule of O₂ that rises, 2 molecules of H₂O that return to the solution, and 4 electrons that flow through the external circuit.',
+    rxn:'ANODE (+) — Oxidation:\n4OH⁻  →  O₂↑  +  2H₂O  +  4e⁻',
     showRxn:true,
-    metrics:[['4OH⁻/reaksi','Ion Masuk','#ffcc80'],['O₂ dilepas','Output/Siklus','#ffcc80'],['Oksidasi','Jenis Reaksi','#ffcc80'],['Gas naik','Perilaku O₂','#ffcc80']],
+    metrics:[['4OH⁻/reaction','Incoming Ions','#ffcc80'],['O₂ released','Output/Cycle','#ffcc80'],['Oxidation','Reaction Type','#ffcc80'],['Gas rises','O₂ Behavior','#ffcc80']],
   },
   {
-    num:'05 / 08', title:'Migrasi Ion OH⁻ melalui Diafragma', sub:'Transfer Ionik Selektif',
+    num:'05 / 08', title:'OH⁻ Ion Migration through Diaphragm', sub:'Selective Ionic Transfer',
     color:'#ab47bc',
-    desc:'Membran diafragma yang terletak di antara katoda dan anoda bersifat permeabel terhadap ion OH⁻ tetapi mencegah gas H₂ dan O₂ bercampur. Ion OH⁻ hasil reaksi katoda bergerak melewati membran menuju anoda untuk melanjutkan siklus reaksi. Pemisahan gas ini krusial untuk keamanan.',
-    rxn:'OH⁻ bermigrasi: Katoda → Diafragma → Anoda\n(Membran mencegah H₂ + O₂ bercampur)',
+    desc:'The diaphragm membrane located between the cathode and anode is permeable to OH⁻ ions but prevents H₂ and O₂ gases from mixing. OH⁻ ions produced at the cathode move through the membrane toward the anode to continue the reaction cycle. This gas separation is crucial for safety.',
+    rxn:'OH⁻ migrates: Cathode → Diaphragm → Anode\n(The membrane prevents H₂ + O₂ from mixing)',
     showRxn:true,
-    metrics:[['Permeabel OH⁻','Sifat Diafragma','#ce93d8'],['Memblok H₂/O₂','Fungsi Utama','#ce93d8'],['Ni / Zirconia','Material','#ce93d8'],['Cegah ledakan','Keamanan','#ce93d8']],
+    metrics:[['OH⁻ Permeable','Diaphragm Property','#ce93d8'],['Blocks H₂/O₂','Main Function','#ce93d8'],['Ni / Zirconia','Material','#ce93d8'],['Prevents explosion','Safety','#ce93d8']],
   },
   {
-    num:'06 / 08', title:'Output H₂ — Gas Hidrogen Murni', sub:'Produk Utama Bernilai Tinggi',
+    num:'06 / 08', title:'H₂ Output — Pure Hydrogen Gas', sub:'High-Value Main Product',
     color:'#1de9b6',
-    desc:'Gas H₂ murni yang terbentuk di katoda naik dan terkumpul di ruang separator. H₂ kemudian dikeringkan, dimurnikan, dan dikompres. Dari alokasi 30% output listrik panas bumi (24.000 MWh/tahun), sistem AWE menghasilkan sekitar 444 ton H₂/tahun—setara USD 1,8–3,1 juta/tahun.',
-    rxn:'Output H₂:\n24.000 MWh ÷ 54 kWh/kg = 444.444 kg/tahun\n≈ 444 ton H₂/tahun → Kompres → Simpan → Ekspor',
+    desc:'Pure H₂ gas formed at the cathode rises and is collected in the separator chamber. The hydrogen is then dried, purified, and compressed. From the allocation of 30% of geothermal electricity output (24,000 MWh/year), the AWE system produces approximately 444 tons of H₂ per year—equivalent to USD 1.8–3.1 million per year.',
+    rxn:'H₂ Output:\n24,000 MWh ÷ 54 kWh/kg = 444,444 kg/year\n≈ 444 tons H₂/year → Compress → Store → Export',
     showRxn:true,
-    metrics:[['~444 ton/thn','Produksi H₂','#6fffd9'],['USD 4–7/kg','Harga Pasar','#6fffd9'],['>99,9%','Kemurnian','#6fffd9'],['700 bar','Tekanan Simpan','#6fffd9']],
+    metrics:[['~444 tons/year','H₂ Production','#6fffd9'],['USD 4–7/kg','Market Price','#6fffd9'],['>99.9%','Purity','#6fffd9'],['700 bar','Storage Pressure','#6fffd9']],
   },
   {
-    num:'07 / 08', title:'Output O₂ — Gas Oksigen', sub:'Produk Samping Bernilai',
+    num:'07 / 08', title:'O₂ Output — Oxygen Gas', sub:'Valuable Byproduct',
     color:'#ffeb3b',
-    desc:'Gas O₂ yang terbentuk di anoda dikumpulkan terpisah. O₂ dapat dijual ke industri medis, metalurgi, atau pengolahan air sebagai aliran pendapatan tambahan. Kemurnian O₂ yang dihasilkan sangat tinggi (>99%), membuatnya bernilai komersial tanpa pemrosesan tambahan yang signifikan.',
-    rxn:'Output O₂:\n2H₂O → 2H₂ + O₂\n(per 444 ton H₂ → ~3.552 ton O₂/tahun)',
+    desc:'O₂ gas formed at the anode is collected separately. Oxygen can be sold to the medical, metallurgical, or water treatment industries as an additional revenue stream. The produced O₂ has very high purity (>99%), making it commercially valuable without significant additional processing.',
+    rxn:'O₂ Output:\n2H₂O → 2H₂ + O₂\n(for 444 tons H₂ → ~3,552 tons O₂/year)',
     showRxn:true,
-    metrics:[['~3.552 ton/thn','Produksi O₂','#fff176'],['Medis/Industri','Kegunaan','#fff176'],['>99%','Kemurnian','#fff176'],['Nilai tambah','Status','#fff176']],
+    metrics:[['~3,552 tons/year','O₂ Production','#fff176'],['Medical/Industrial','Applications','#fff176'],['>99%','Purity','#fff176'],['Value-added','Status','#fff176']],
   },
   {
-    num:'08 / 08', title:'H₂ Hijau Tersimpan & Siap Ekspor', sub:'Output Akhir IGDOF-GH',
+    num:'08 / 08', title:'Stored Green H₂ & Ready for Export', sub:'Final Output of IGDOF-GH',
     color:'#69f0ae',
-    desc:'H₂ yang sudah dimurnikan dikompres ke 350–700 bar dan disimpan dalam tangki bertekanan atau dikonversi ke amonia (NH₃) untuk kemudahan transportasi. Dari satu lapangan panas bumi 10 MW, IGDOF-GH menghasilkan ~444 ton H₂/tahun yang siap diekspor ke Jepang, Korea Selatan, dan Uni Eropa.',
-    rxn:'Alur lengkap: Panas Bumi → Listrik → AWE → H₂\n444 ton H₂/thn · USD 6,52/kg LCOH · Target 2030: USD 2–4/kg',
+    desc:'Purified hydrogen is compressed to 350–700 bar and stored in high-pressure tanks or converted into ammonia (NH₃) for easier transportation. From a 10 MW geothermal field, IGDOF-GH produces approximately 444 tons of H₂ per year, ready for export to Japan, South Korea, and the European Union.',
+    rxn:'Full pathway: Geothermal → Electricity → AWE → H₂\n444 tons H₂/year · USD 6.52/kg LCOH · 2030 Target: USD 2–4/kg',
     showRxn:true,
-    metrics:[['~444 ton/thn','H₂ per 10 MW','#a5d6a7'],['USD 6,52/kg','LCOH Kini','#a5d6a7'],['USD 2–4/kg','Target 2030','#a5d6a7'],['JP · KR · EU','Pasar Ekspor','#a5d6a7']],
+    metrics:[['~444 tons/year','H₂ per 10 MW','#a5d6a7'],['USD 6.52/kg','Current LCOH','#a5d6a7'],['USD 2–4/kg','2030 Target','#a5d6a7'],['JP · KR · EU','Export Markets','#a5d6a7']],
   },
 ];
 
@@ -385,11 +390,11 @@ function addMesh(geo, mat, x,y,z, rx=0,ry=0,rz=0, shadow=true) {
 /* ══════════════════════════════════════════
    BUILD AWE CELL
    Layout (X axis, left-right):
-   -9  : Listrik input (from geothermal)
-   -5.5: Katoda (electrode -)
-   -1.5: Diafragma (membrane)
-    1.5: Anoda (electrode +)
-    5.5: Listrik output
+   -9  : Electrical input (from geothermal)
+   -5.5: Cathode (electrode -)
+   -1.5: Diaphragm (membrane)
+    1.5: Anode (electrode +)
+    5.5: Electrical output
     9  : H2 separator/tank (left back)
    
    Y axis = height
@@ -572,13 +577,13 @@ function roundRect2(ctx,x,y,w,h,r){
 }
 
 const spriteLabels = [
-  { text:'KATODA (−)', sub:'Reduksi · H₂ naik', bg:'#1a0505', fg:'#ff8080', pos:[-5.5,10.8,5.5] },
-  { text:'DIAFRAGMA', sub:'Permeabel OH⁻', bg:'#0f0f2a', fg:'#c4b5fd', pos:[0,10.8,5.5] },
-  { text:'ANODA (+)', sub:'Oksidasi · O₂ naik', bg:'#1a1000', fg:'#ffcc66', pos:[5.5,10.8,5.5] },
-  { text:'H₂ SEPARATOR', sub:'~444 ton/tahun', bg:'#001a12', fg:'#4fffce', pos:[-13,10,0] },
-  { text:'O₂ SEPARATOR', sub:'~3.552 ton/tahun', bg:'#1a0a00', fg:'#ffd080', pos:[13,10,0] },
-  { text:'H₂O + KOH', sub:'Elektrolit 20–30%', bg:'#001020', fg:'#88ccff', pos:[0,21,0] },
-  { text:'LISTRIK PANAS BUMI', sub:'~54 kWh/kg H₂', bg:'#000a20', fg:'#7ab4ff', pos:[0,23.5,0] },
+  { text:'CATHODE (−)', sub:'Reduction · H₂ rises', bg:'#1a0505', fg:'#ff8080', pos:[-5.5,10.8,5.5] },
+  { text:'DIAPHRAGM', sub:'OH⁻ permeable', bg:'#0f0f2a', fg:'#c4b5fd', pos:[0,10.8,5.5] },
+  { text:'ANODE (+)', sub:'Oxidation · O₂ rises', bg:'#1a1000', fg:'#ffcc66', pos:[5.5,10.8,5.5] },
+  { text:'H₂ SEPARATOR', sub:'~444 tons/year', bg:'#001a12', fg:'#4fffce', pos:[-13,10,0] },
+  { text:'O₂ SEPARATOR', sub:'~3,552 tons/year', bg:'#1a0a00', fg:'#ffd080', pos:[13,10,0] },
+  { text:'H₂O + KOH', sub:'Electrolyte 20–30%', bg:'#001020', fg:'#88ccff', pos:[0,21,0] },
+  { text:'GEOTHERMAL ELECTRICITY', sub:'~54 kWh/kg H₂', bg:'#000a20', fg:'#7ab4ff', pos:[0,23.5,0] },
 ];
 spriteLabels.forEach(l => {
   const sp = makeSprite(l.text, l.sub, l.bg, l.fg);
@@ -753,17 +758,17 @@ const raycaster2 = new THREE.Raycaster();
 const mouse2 = new THREE.Vector2();
 const tooltipEl = document.getElementById('tooltip');
 const clickMap = new Map([
-  [cathode, {tip:'Katoda (−) — Elektroda Negatif\nReduksi: 4H₂O + 4e⁻ → 2H₂↑ + 4OH⁻', step:2}],
-  [anode,   {tip:'Anoda (+) — Elektroda Positif\nOksidasi: 4OH⁻ → O₂↑ + 2H₂O + 4e⁻', step:3}],
-  [diaphragm,{tip:'Diafragma Membran\nPermeabel OH⁻ · Memblok H₂ & O₂\nMaterial: Ni / Zirconia', step:4}],
-  [h2Sep,   {tip:'H₂ Separator\n~444 ton H₂/tahun per 10 MW', step:5}],
-  [o2Sep,   {tip:'O₂ Separator\n~3.552 ton O₂/tahun · Bernilai komersial', step:6}],
-  [h2Store, {tip:'Tangki Penyimpanan H₂\nKompres 350–700 bar → Ekspor JP/KR/EU', step:7}],
-  [o2Out,   {tip:'Tangki O₂\nKemurnian >99% → Industri medis', step:6}],
-  [waterTank,{tip:'Tangki Air + KOH\nH₂O + KOH 20–30% = Elektrolit alkalin', step:1}],
-  [kohTank, {tip:'Tangki KOH\nKalium Hidroksida — meningkatkan konduktivitas ionik', step:1}],
+[cathode, {tip:'Cathode (−) — Negative Electrode\nReduction: 4H₂O + 4e⁻ → 2H₂↑ + 4OH⁻', step:2}],
+[anode,   {tip:'Anode (+) — Positive Electrode\nOxidation: 4OH⁻ → O₂↑ + 2H₂O + 4e⁻', step:3}],
+[diaphragm,{tip:'Diaphragm Membrane\nOH⁻ Permeable · Blocks H₂ & O₂\nMaterial: Ni / Zirconia', step:4}],
+[h2Sep,   {tip:'H₂ Separator\n~444 tons H₂/year per 10 MW', step:5}],
+[o2Sep,   {tip:'O₂ Separator\n~3,552 tons O₂/year · Commercially valuable', step:6}],
+[h2Store, {tip:'H₂ Storage Tank\nCompressed 350–700 bar → Export to JP/KR/EU', step:7}],
+[o2Out,   {tip:'O₂ Tank\nPurity >99% → Medical industry', step:6}],
+[waterTank,{tip:'Water + KOH Tank\nH₂O + KOH 20–30% = Alkaline electrolyte', step:1}],
+[kohTank, {tip:'KOH Tank\nPotassium Hydroxide — increases ionic conductivity', step:1}],
 ]);
-
+  
 window.addEventListener('mousemove', e => {
   mouse2.x=(e.clientX/window.innerWidth)*2-1;
   mouse2.y=-((e.clientY/window.innerHeight)*2-1);
